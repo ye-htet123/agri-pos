@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import 'cookie-parser'; // 👈 Express Request ထဲသို့ cookies property type ထည့်ပေးရန် မဖြစ်မနေ လိုအပ်ပါသည်
 import { verifyAccessToken, TokenPayload } from '../utils/jwt';
 import { sendError } from '../utils/responseHandler';
 
@@ -10,8 +11,9 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
   try {
     let token = req.cookies?.accessToken;
 
-    if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-      token = req.headers.authorization.split(' ')[1];
+    const authHeader = req.headers.authorization;
+    if (!token && authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
     }
 
     if (!token) {
