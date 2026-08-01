@@ -1,0 +1,70 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* Google Myanmar Font Import (Font ကြေ/ထပ်ခြင်းအတွက်) */
+@import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap');
+
+/* စိုက်ပျိုးရေးနဲ့ လိုက်ဖက်မယ့် Custom Theme (Optional) */
+@theme {
+  --color-agri-green: #2e7d32;
+  --color-agri-light: #f1f8e9;
+  --color-agri-dark: #1b5e20;
+}
+
+/* Fixed Absolute Coordinate Flying Keyframes */
+@keyframes flyToCartFixed {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1.2);
+  }
+
+  40% {
+    opacity: 0.9;
+    /* လမ်းခုလတ်တွင် အပေါ်သို့ နည်းနည်း ပင့်မြှောက်သွားရန် Curve effect */
+    transform: translate(calc((var(--end-x) - var(--start-x)) * 0.4),
+        calc((var(--end-y) - var(--start-y)) * 0.4 - 60px)) scale(1);
+  }
+
+  100% {
+    opacity: 0.1;
+    transform: translate(calc(var(--end-x) - var(--start-x)),
+        calc(var(--end-y) - var(--start-y))) scale(0.2);
+  }
+}
+
+.animate-fly-to-cart {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  animation: flyToCartFixed 0.7s cubic-bezier(0.16, 0.85, 0.45, 1) forwards;
+}
+
+/* ==========================================
+   RECEIPT & PRINT STYLES (For react-to-print)
+   ========================================== */
+
+/* Thermal receipt paper styling & Myanmar Font Fix */
+.printable-receipt,
+.printable-receipt * {
+  background-color: #ffffff;
+  color: #000000;
+  font-family: 'Padauk', 'Pyidaungsu', 'Myanmar3', sans-serif !important;
+  line-height: 1.6 !important;
+  /* စာလုံးများ အပေါ်အောက် ထပ်မသွားစေရန် */
+}
+
+/* react-to-print ထုတ်သည့်အခါ Thermal Paper (80mm) Size သတ်မှတ်ချက် */
+@media print {
+  @page {
+    size: 80mm auto;
+    margin: 0mm;
+  }
+
+  html,
+  body {
+    width: 80mm;
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+  }
+}
