@@ -1,26 +1,28 @@
 import axios from 'axios';
 
-// Dynamically determine backend API base URL so the mobile device connected via local WiFi works seamlessly
 const getDynamicApiBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_BASE_URL;
-  // If explicitly defined in .env and NOT using localhost, use it directly
-  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+
+  // 1. If VITE_API_BASE_URL is set (e.g. Render backend URL), use it directly
+  if (envUrl) {
     return envUrl;
   }
 
-  // Dynamically resolve network IP hostname from current browser location
+  // 2. Local network dynamic host resolution (Development mode)
   if (typeof window !== 'undefined' && window.location && window.location.hostname) {
-    return `http://${window.location.hostname}:5000/api/v1`;
+    if (window.location.hostname !== 'localhost' && !window.location.hostname.endsWith('.vercel.app')) {
+      return `http://${window.location.hostname}:5000/api/v1`;
+    }
   }
 
-  return envUrl || 'http://localhost:5000/api/v1';
+  return 'http://localhost:5000/api/v1';
 };
 
 const API_BASE_URL = getDynamicApiBaseUrl();
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true,
+  withCredentials: true, // ⚠️ Required for sending cross-site cookies
   headers: {
     'Content-Type': 'application/json',
   },
@@ -32,7 +34,6 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Do not attempt token refresh for login, refresh, or me checks
     const isAuthRoute =
       originalRequest.url?.includes('/auth/login') ||
       originalRequest.url?.includes('/auth/refresh') ||
@@ -45,7 +46,6 @@ api.interceptors.response.use(
         await api.post('/auth/refresh');
         return api(originalRequest);
       } catch (refreshError) {
-        // If refresh fails, reject error silently so React AuthContext handles unauthenticated state without page reload
         return Promise.reject(refreshError);
       }
     }

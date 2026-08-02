@@ -26,25 +26,35 @@ export const verifyRefreshToken = (token: string): TokenPayload => {
 };
 
 export const setAuthCookies = (res: Response, accessToken: string, refreshToken: string): void => {
-  const isProduction = process.env.NODE_ENV === 'production';
+  // Render ပေါ်မှာ NODE_ENV မသတ်မှတ်ရသေးရင်တောင် RENDER=true ပါရင် Production လို့ ယူဆမည်
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: isProduction, // Cross-site Cookie ရရှိရန် HTTPS (Production) တွင် true ဖြစ်ရမည်
+    sameSite: (isProduction ? 'none' : 'lax') as 'none' | 'lax', // ⚠️ Vercel -> Render Cross-site အတွက် 'none' သုံးရပါမည်
+  };
 
   res.cookie('accessToken', accessToken, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? 'strict' : 'lax',
+    ...cookieOptions,
     maxAge: 15 * 60 * 1000, // 15 minutes
   });
 
   res.cookie('refreshToken', refreshToken, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? 'strict' : 'lax',
+    ...cookieOptions,
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 };
 
 export const clearAuthCookies = (res: Response): void => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  res.clearCookie('accessToken', { httpOnly: true, secure: isProduction, sameSite: isProduction ? 'strict' : 'lax' });
-  res.clearCookie('refreshToken', { httpOnly: true, secure: isProduction, sameSite: isProduction ? 'strict' : 'lax' });
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: (isProduction ? 'none' : 'lax') as 'none' | 'lax',
+  };
+
+  res.clearCookie('accessToken', cookieOptions);
+  res.clearCookie('refreshToken', cookieOptions);
 };

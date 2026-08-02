@@ -21,21 +21,23 @@ app.use(
   })
 );
 
-// Dynamic CORS configuration allowing localhost and any local network IP origin (e.g. 192.168.x.x)
+// Dynamic CORS configuration
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (mobile native apps, curl, postman)
       if (!origin) return callback(null, true);
 
-      // Regex matching localhost, 127.0.0.1, and private IP subnets (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
-      const isLocalNetwork = /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(:\d+)?$/.test(origin);
+      // Regex matching localhost, private local IPs, and Vercel domains
+      const isAllowedOrigin =
+        /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(:\d+)?$/.test(origin) ||
+        origin.endsWith('.vercel.app') ||
+        origin === process.env.CLIENT_URL;
 
-      if (isLocalNetwork || origin === process.env.CLIENT_URL) {
+      if (isAllowedOrigin) {
         return callback(null, true);
       }
 
-      // Permissive fallback for dev testing
       callback(null, true);
     },
     credentials: true,
