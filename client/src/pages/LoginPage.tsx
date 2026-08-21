@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
+  const { t } = useLanguage();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -14,7 +16,7 @@ export const LoginPage: React.FC = () => {
     setError('');
 
     if (!username.trim() || !password) {
-      setError('Username နှင့် Password ဖြည့်စွက်ပါ');
+      setError(t('login.errorEmpty'));
       return;
     }
 
@@ -22,17 +24,17 @@ export const LoginPage: React.FC = () => {
     try {
       const success = await login({ username: username.trim(), password });
       if (!success) {
-        setError('Username သို့မဟုတ် Password မှားယွင်းနေပါသည်။');
+        setError(t('login.errorInvalid'));
       }
     } catch {
-      setError('ဆာဗာနှင့် ချိတ်ဆက်မှု မအောင်မြင်ပါ။ Backend ဖွင့်ထားသည်မှာ သေချာပါသလား?');
+      setError(t('login.errorServer'));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-slate-900 dark:to-emerald-950 flex items-center justify-center p-4">
       <div className="card w-full max-w-sm bg-base-100 shadow-2xl border border-base-200">
         <form onSubmit={handleSubmit} className="card-body gap-3">
 
@@ -40,7 +42,7 @@ export const LoginPage: React.FC = () => {
           <div className="text-center mb-2">
             <span className="text-5xl">🌾</span>
             <h2 className="text-2xl font-bold text-success mt-2">Agri POS</h2>
-            <p className="text-xs text-gray-500 mt-1">စိုက်ပျိုးရေးဆိုင်ရာ အရောင်းစနစ်</p>
+            <p className="text-xs text-base-content/50 mt-1">{t('login.subtitle')}</p>
           </div>
 
           {/* Error Banner */}
@@ -53,11 +55,11 @@ export const LoginPage: React.FC = () => {
           {/* Username */}
           <div className="form-control">
             <label className="label py-1">
-              <span className="label-text font-semibold text-sm">Username</span>
+              <span className="label-text font-semibold text-sm">{t('login.username')}</span>
             </label>
             <input
               type="text"
-              placeholder="admin သို့မဟုတ် cashier"
+              placeholder="admin / cashier"
               className="input input-bordered focus:input-success w-full"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -69,7 +71,7 @@ export const LoginPage: React.FC = () => {
           {/* Password with show/hide */}
           <div className="form-control">
             <label className="label py-1">
-              <span className="label-text font-semibold text-sm">Password</span>
+              <span className="label-text font-semibold text-sm">{t('login.password')}</span>
             </label>
             <div className="relative">
               <input
@@ -83,7 +85,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content transition-colors"
                 tabIndex={-1}
               >
                 {showPassword ? '🙈' : '👁️'}
@@ -99,18 +101,18 @@ export const LoginPage: React.FC = () => {
               className="btn btn-success text-white font-bold w-full gap-2"
             >
               {isLoading ? (
-                <><span className="loading loading-spinner loading-sm"></span> စစ်ဆေးနေသည်...</>
+                <><span className="loading loading-spinner loading-sm"></span> {t('login.checking')}</>
               ) : (
-                '🔐 အကောင့်ဝင်မည်'
+                t('login.signIn')
               )}
             </button>
           </div>
 
           {/* Demo credentials */}
-          <div className="mt-1 p-3 bg-base-200 rounded-xl text-xs text-gray-500">
-            <p className="font-semibold text-gray-600 mb-1">💡 Demo Accounts (Password: 123):</p>
-            <p>• Admin: <code className="text-success font-bold">admin</code></p>
-            <p>• Cashier: <code className="text-success font-bold">cashier</code></p>
+          <div className="mt-1 p-3 bg-base-200 rounded-xl text-xs text-base-content/50">
+            <p className="font-semibold text-base-content/60 mb-1">{t('login.demoTitle')}</p>
+            <p>• {t('login.demoAdmin')}: <code className="text-success font-bold">admin</code></p>
+            <p>• {t('login.demoCashier')}: <code className="text-success font-bold">cashier</code></p>
           </div>
         </form>
       </div>

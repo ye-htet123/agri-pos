@@ -23,6 +23,8 @@ export const getStoreSettings = async (req: Request, res: Response): Promise<voi
       receiptHeader: settings.receiptHeader,
       receiptFooter: settings.receiptFooter,
       taxRate: settings.taxRate,
+      cultivationDurationDays: settings.cultivationDurationDays ?? 60,
+      unpaidDurationDays: settings.unpaidDurationDays ?? 60,
     });
   } catch (error: any) {
     sendError(res, error.message || 'ဆိုင်ဆက်တင်များ ရယူရာတွင် အမှားဖြစ်ပွားပါသည်', 500);
@@ -31,7 +33,7 @@ export const getStoreSettings = async (req: Request, res: Response): Promise<voi
 
 export const updateStoreSettings = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { shopName, address, phone, receiptHeader, receiptFooter, taxRate } = req.body;
+    const { shopName, address, phone, receiptHeader, receiptFooter, taxRate, cultivationDurationDays, unpaidDurationDays } = req.body;
 
     let settings = await StoreSetting.findOne();
     if (!settings) {
@@ -44,6 +46,12 @@ export const updateStoreSettings = async (req: Request, res: Response): Promise<
     if (receiptHeader !== undefined) settings.receiptHeader = receiptHeader;
     if (receiptFooter !== undefined) settings.receiptFooter = receiptFooter;
     if (taxRate !== undefined) settings.taxRate = Number(taxRate);
+    if (cultivationDurationDays !== undefined) {
+      settings.cultivationDurationDays = Math.max(0, Number(cultivationDurationDays) || 0);
+    }
+    if (unpaidDurationDays !== undefined) {
+      settings.unpaidDurationDays = Math.max(0, Number(unpaidDurationDays) || 0);
+    }
 
     await settings.save();
 
@@ -54,6 +62,8 @@ export const updateStoreSettings = async (req: Request, res: Response): Promise<
       receiptHeader: settings.receiptHeader,
       receiptFooter: settings.receiptFooter,
       taxRate: settings.taxRate,
+      cultivationDurationDays: settings.cultivationDurationDays,
+      unpaidDurationDays: settings.unpaidDurationDays,
     });
   } catch (error: any) {
     sendError(res, error.message || 'ဆိုင်ဆက်တင် ပြင်ဆင်ရာတွင် အမှားဖြစ်ပွားပါသည်', 500);

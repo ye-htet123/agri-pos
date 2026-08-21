@@ -1,5 +1,6 @@
 import React from 'react';
 import { useCart } from '../../context/CartContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface CartListProps {
     onOpenCheckout: () => void;
@@ -8,12 +9,13 @@ interface CartListProps {
 
 export const CartList: React.FC<CartListProps> = ({ onOpenCheckout, onClose }) => {
     const { cart, removeFromCart, updateQuantity, clearCart, totalPrice, showToast } = useCart();
+    const { t } = useLanguage();
 
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
     const handleIncrement = (productName: string, currentQty: number, stock: number, unit: string, productId: string) => {
         if (currentQty >= stock) {
-            showToast(`ပစ္စည်း '${productName}' ၏ လက်ကျန် ${stock} ${unit || 'ခု'}ပဲ ရှိပါတော့တယ်`);
+            showToast(t('pos.stockLimitToast', { name: productName, stock, unit: unit || t('common.items') }));
             return;
         }
         updateQuantity(productId, currentQty + 1);
@@ -33,7 +35,7 @@ export const CartList: React.FC<CartListProps> = ({ onOpenCheckout, onClose }) =
             <div>
                 <div className="flex justify-between items-center pb-3 border-b border-base-200 mb-3">
                     <h2 id="desktop-cart-icon" className="font-bold text-lg flex items-center gap-2">
-                        🛒 ဈေးဝယ်ခြင်းတောင်း
+                        🛒 {t('pos.cartTitle')}
                         {totalItems > 0 && (
                             <span className="badge badge-success badge-sm text-white">
                                 {totalItems}
@@ -54,7 +56,7 @@ export const CartList: React.FC<CartListProps> = ({ onOpenCheckout, onClose }) =
                         {onClose && (
                             <button
                                 onClick={onClose}
-                                className="btn btn-circle btn-ghost btn-xs text-gray-500 hover:bg-base-300"
+                                className="btn btn-circle btn-ghost btn-xs text-base-content/50 hover:bg-base-300"
                                 title="ပိတ်မည်"
                             >
                                 ✕
@@ -65,10 +67,10 @@ export const CartList: React.FC<CartListProps> = ({ onOpenCheckout, onClose }) =
 
                 {/* 2. Cart Items List */}
                 {cart.length === 0 ? (
-                    <div className="text-center py-12 text-gray-400">
+                    <div className="text-center py-12 text-base-content/40">
                         <div className="text-5xl mb-3">🛒</div>
                         <p className="text-sm font-medium">ခြင်းတောင်းထဲတွင် ပစ္စည်းမရှိသေးပါ</p>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-base-content/40 mt-1">
                             ဘယ်ဘက်မှ ပစ္စည်းများကို နှိပ်၍ ထည့်သွင်းပါ
                         </p>
                     </div>
@@ -119,7 +121,7 @@ export const CartList: React.FC<CartListProps> = ({ onOpenCheckout, onClose }) =
                                             >
                                                 -
                                             </button>
-                                            <span className={`join-item px-2 flex items-center justify-center text-xs font-bold min-w-[28px] ${isMaxStock ? 'text-amber-600' : ''}`}>
+                                            <span className={`join-item px-2 flex items-center justify-center text-xs font-bold min-w-[28px] ${isMaxStock ? 'text-warning' : ''}`}>
                                                 {item.quantity}
                                             </span>
                                             <button
@@ -143,7 +145,7 @@ export const CartList: React.FC<CartListProps> = ({ onOpenCheckout, onClose }) =
                                         {/* Remove Button */}
                                         <button
                                             onClick={() => removeFromCart(item.product.id)}
-                                            className="btn btn-ghost btn-xs text-gray-400 hover:text-error p-1"
+                                            className="btn btn-ghost btn-xs text-base-content/40 hover:text-error p-1"
                                             title="ဖျက်မည်"
                                         >
                                             ❌
@@ -160,7 +162,7 @@ export const CartList: React.FC<CartListProps> = ({ onOpenCheckout, onClose }) =
             {cart.length > 0 && (
                 <div className="pt-4 border-t border-base-200 mt-4 space-y-3">
                     <div className="flex justify-between items-center text-base">
-                        <span className="font-semibold text-gray-600">စုစုပေါင်း ကျသင့်ငွေ</span>
+                        <span className="font-semibold text-base-content/60">စုစုပေါင်း ကျသင့်ငွေ</span>
                         <span className="font-extrabold text-xl text-success">
                             {totalPrice.toLocaleString()} ကျပ်
                         </span>

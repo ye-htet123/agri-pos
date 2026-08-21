@@ -132,7 +132,7 @@ export const StaffPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-base-content">👥 ဝန်ထမ်းများ စီမံခန့်ခွဲခြင်း</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-base-content/50 mt-1">
             ဆိုင်၏ ဝန်ထမ်းအကောင့်များနှင့် လုပ်ပိုင်ခွင့် (Role) များကို စီမံနိုင်ပါသည်။
           </p>
         </div>
@@ -146,13 +146,13 @@ export const StaffPage: React.FC = () => {
         {isLoading ? (
           <div className="flex justify-center items-center py-20">
             <span className="loading loading-spinner loading-md text-primary"></span>
-            <span className="ml-3 text-sm text-gray-400">ဝန်ထမ်းစာရင်း ရယူနေပါသည်...</span>
+            <span className="ml-3 text-sm text-base-content/40">ဝန်ထမ်းစာရင်း ရယူနေပါသည်...</span>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="table w-full">
               <thead>
-                <tr className="bg-base-200/50 text-gray-600 text-sm">
+                <tr className="bg-base-200/50 text-base-content/60 text-sm">
                   <th>အမည်</th>
                   <th>Username</th>
                   <th>ဖုန်းနံပါတ်</th>
@@ -164,7 +164,7 @@ export const StaffPage: React.FC = () => {
               <tbody>
                 {staffList.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-10 text-gray-400">
+                    <td colSpan={6} className="text-center py-10 text-base-content/40">
                       ဝန်ထမ်းစာရင်း မရှိသေးပါ
                     </td>
                   </tr>
@@ -172,14 +172,14 @@ export const StaffPage: React.FC = () => {
                   staffList.map((staff) => (
                     <tr key={staff.id} className="hover:bg-base-200/30">
                       <td className="font-bold">{staff.name}</td>
-                      <td className="font-mono text-xs text-gray-500">@{staff.username}</td>
+                      <td className="font-mono text-xs text-base-content/50">@{staff.username}</td>
                       <td className="text-sm">{staff.phone || '-'}</td>
                       <td>
-                        <span className={`badge badge-sm font-semibold ${staff.role === 'ADMIN' ? 'badge-primary text-white' : 'badge-ghost border-gray-300'}`}>
+                        <span className={`badge badge-sm font-semibold ${staff.role === 'ADMIN' ? 'badge-primary text-white' : 'badge-ghost border-base-300'}`}>
                           {staff.role === 'ADMIN' ? '🛡️ ADMIN' : '💵 CASHIER'}
                         </span>
                       </td>
-                      <td className="text-xs text-gray-400">
+                      <td className="text-xs text-base-content/40">
                         {staff.createdAt ? new Date(staff.createdAt).toLocaleDateString() : '-'}
                       </td>
                       <td className="text-right space-x-1">
@@ -278,7 +278,7 @@ export const StaffPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors text-base"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content/70 transition-colors text-base"
                     tabIndex={-1}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
@@ -286,7 +286,7 @@ export const StaffPage: React.FC = () => {
                   </button>
                 </div>
                 {!editingStaff && (
-                  <span className="text-[10px] text-gray-400 mt-1 ml-1">မိနစ် ၆ လုံး ထက် မနည်းရ</span>
+                  <span className="text-[10px] text-base-content/40 mt-1 ml-1">မိနစ် ၆ လုံး ထက် မနည်းရ</span>
                 )}
               </div>
 

@@ -46,7 +46,7 @@ export const InventoryPage: React.FC = () => {
                     <h1 className="text-xl font-bold flex items-center gap-2">
                         📦 စတော့ ပစ္စည်းများ စီမံခန့်ခွဲမှု
                     </h1>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-base-content/50 mt-1">
                         ပစ္စည်း {products.length} မျိုး
                         {lowStockCount > 0 && (
                             <span className="ml-2 badge badge-warning badge-xs font-semibold">
@@ -101,12 +101,12 @@ export const InventoryPage: React.FC = () => {
             {isLoading ? (
                 <div className="flex justify-center items-center py-20 bg-base-100 rounded-xl border border-base-200">
                     <span className="loading loading-spinner loading-md text-primary"></span>
-                    <span className="ml-3 text-sm text-gray-400">ပစ္စည်းစာရင်း ရယူနေပါသည်...</span>
+                    <span className="ml-3 text-sm text-base-content/40">ပစ္စည်းစာရင်း ရယူနေပါသည်...</span>
                 </div>
             ) : (
                 <div className="bg-base-100 rounded-xl border border-base-200 overflow-hidden">
                     {filteredProducts.length === 0 ? (
-                        <div className="text-center py-16 text-gray-400">
+                        <div className="text-center py-16 text-base-content/40">
                             <div className="text-4xl mb-2">📭</div>
                             <p className="text-sm">{searchQuery || selectedCategory !== 'All' ? 'ရှာဖွေမှုနှင့် ကိုက်ညီသော ပစ္စည်း မတွေ့ရှိပါ' : 'ပစ္စည်းစာရင်း မရှိသေးပါ'}</p>
                         </div>
@@ -114,7 +114,7 @@ export const InventoryPage: React.FC = () => {
                         <div className="overflow-x-auto">
                             <table className="table w-full">
                                 <thead>
-                                    <tr className="bg-base-200/50 text-gray-600 text-sm">
+                                    <tr className="bg-base-200/50 text-base-content/60 text-sm">
                                         <th>ပစ္စည်းအမည်</th>
                                         <th>အမျိုးအစား</th>
                                         <th className="text-right">ရင်းဈေး</th>
@@ -133,17 +133,17 @@ export const InventoryPage: React.FC = () => {
                                             <td>
                                                 <span className="badge badge-ghost badge-sm">{product.category}</span>
                                             </td>
-                                            <td className="text-right text-xs text-gray-500">
+                                            <td className="text-right text-xs text-base-content/50">
                                                 {product.costPrice?.toLocaleString() || 0} ကျပ်
                                             </td>
                                             <td className="text-right font-bold text-green-700">
                                                 {product.price?.toLocaleString()} ကျပ်
                                             </td>
                                             <td className="text-center">
-                                                <span className={`font-bold text-sm ${product.stock <= 5 ? 'text-red-600' : product.stock <= 10 ? 'text-yellow-600' : 'text-gray-700'}`}>
+                                                <span className={`font-bold text-sm ${product.stock <= 5 ? 'text-error' : product.stock <= 10 ? 'text-warning' : 'text-base-content/70'}`}>
                                                     {product.stock}
                                                 </span>
-                                                <span className="text-xs text-gray-400 ml-1">{product.unit}</span>
+                                                <span className="text-xs text-base-content/40 ml-1">{product.unit}</span>
                                             </td>
                                             <td className="text-right space-x-1">
                                                 <button

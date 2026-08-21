@@ -1,5 +1,7 @@
 import React from 'react';
 import type { UserRole } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
+
 interface SidebarProps {
     currentPath: string;
     onNavigate: (path: string) => void;
@@ -11,41 +13,49 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onNavigate,
     userRole = 'ADMIN',
 }) => {
+    const { t } = useLanguage();
+
     // Menu items ဖွဲ့စည်းပုံ
     const menuItems = [
         {
             id: 'pos',
-            label: 'အရောင်းမျက်နှာပြင် (POS)',
+            labelKey: 'sidebar.pos',
             icon: '🛒',
             roles: ['ADMIN', 'CASHIER'],
         },
         {
+            id: 'sales-records',
+            labelKey: 'sidebar.salesRecords',
+            icon: '📋',
+            roles: ['ADMIN'],
+        },
+        {
             id: 'inventory',
-            label: 'ပစ္စည်းစာရင်း (Inventory)',
+            labelKey: 'sidebar.inventory',
             icon: '📦',
             roles: ['ADMIN'],
         },
         {
             id: 'categories',
-            label: 'အမျိုးအစားများ (Categories)',
+            labelKey: 'sidebar.categories',
             icon: '🏷️',
             roles: ['ADMIN'],
         },
         {
             id: 'dashboard',
-            label: 'စာရင်းအင်း (Dashboard)',
+            labelKey: 'sidebar.dashboard',
             icon: '📊',
             roles: ['ADMIN'],
         },
         {
             id: 'staff',
-            label: 'ဝန်ထမ်းများ (Staff)',
+            labelKey: 'sidebar.staff',
             icon: '👥',
             roles: ['ADMIN'],
         },
         {
             id: 'settings',
-            label: 'စနစ်ပြင်ဆင်မှု (Settings)',
+            labelKey: 'sidebar.settings',
             icon: '⚙️',
             roles: ['ADMIN'],
         },
@@ -59,8 +69,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return (
         <aside className="w-64 bg-base-100 min-h-screen border-r border-base-200 p-4 flex flex-col justify-between">
             <div>
-                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-2">
-                    ပင်မ မီနူးများ
+                <div className="text-xs font-semibold text-base-content/40 uppercase tracking-wider mb-4 px-2">
+                    {t('sidebar.mainMenu')}
                 </div>
                 <ul className="menu menu-md p-0 gap-1">
                     {filteredMenuItems.map((item) => {
@@ -75,7 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                         }`}
                                 >
                                     <span className="text-lg">{item.icon}</span>
-                                    <span>{item.label}</span>
+                                    <span>{t(item.labelKey)}</span>
                                 </button>
                             </li>
                         );
@@ -84,9 +94,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             {/* Footer Info inside Sidebar */}
-            <div className="p-3 bg-base-200/60 rounded-xl text-center text-xs text-gray-500">
+            <div className="p-3 bg-base-200/60 rounded-xl text-center text-xs text-base-content/50">
                 <p className="font-semibold text-success">Agri POS v1.0</p>
-                <p>© 2026 All Rights Reserved</p>
+                <p>{t('sidebar.copyright')}</p>
             </div>
         </aside>
     );

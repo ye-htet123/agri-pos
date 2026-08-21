@@ -3,13 +3,21 @@ import type { ReactNode } from 'react';
 import type { Product, CartItem } from '../types';
 import api from '../services/api';
 
+interface CheckoutOptions {
+  receivedAmount: number;
+  paymentMethod?: string;
+  paymentStatus?: 'PAID' | 'UNPAID';
+  customerName?: string;
+  customerPlace?: string;
+}
+
 interface CartContextType {
   cart: CartItem[];
   addToCart: (product: Product) => boolean;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
-  checkout: (receivedAmount: number, paymentMethod?: string) => Promise<{ success: boolean; message?: string; order?: any }>;
+  checkout: (options: CheckoutOptions) => Promise<{ success: boolean; message?: string; order?: any }>;
   totalPrice: number;
   toastMessage: string | null;
   showToast: (message: string) => void;
@@ -99,8 +107,10 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     0
   );
 
-  const checkout = async (receivedAmount: number, paymentMethod = 'CASH') => {
+  const checkout = async (options: CheckoutOptions) => {
     try {
+      const { receivedAmount, paymentMethod = 'CASH', paymentStatus = 'PAID', customerName, customerPlace } = options;
+
       const payload = {
         items: cart.map((item) => ({
           productId: item.product.id,
@@ -109,6 +119,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         })),
         receivedAmount,
         paymentMethod,
+        paymentStatus,
+        customerName: customerName || '',
+        customerPlace: customerPlace || '',
       };
 
       const response = await api.post('/orders', payload);

@@ -7,6 +7,8 @@ export interface IStoreSetting extends Document {
   receiptHeader?: string;
   receiptFooter: string;
   taxRate: number;
+  cultivationDurationDays: number;
+  unpaidDurationDays: number;
 }
 
 const StoreSettingSchema: Schema = new Schema(
@@ -17,6 +19,8 @@ const StoreSettingSchema: Schema = new Schema(
     receiptHeader: { type: String, default: 'ဝယ်ယူအားပေးမှုကို ကျေးဇူးအထူးတင်ရှိပါသည်' },
     receiptFooter: { type: String, default: 'ဝယ်ယူပြီးပစ္စည်း ပြန်မလဲပါ' },
     taxRate: { type: Number, default: 0 },
+    cultivationDurationDays: { type: Number, default: 60, min: 0 },
+    unpaidDurationDays: { type: Number, default: 60, min: 0 },
   },
   {
     timestamps: true,

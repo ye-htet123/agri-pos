@@ -16,7 +16,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
         <div className="overflow-x-auto bg-base-100 rounded-xl border border-base-200 shadow-xs">
             <table className="table table-zebra w-full">
                 <thead>
-                    <tr className="bg-base-200/60 text-gray-700">
+                    <tr className="bg-base-200/60 text-base-content/70">
                         <th>ပစ္စည်း</th>
                         <th>အမျိုးအစား</th>
                         <th className="text-right">ရင်းဈေး</th>
@@ -28,7 +28,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                 <tbody>
                     {products.length === 0 ? (
                         <tr>
-                            <td colSpan={6} className="text-center py-8 text-gray-400">
+                            <td colSpan={6} className="text-center py-8 text-base-content/40">
                                 ပစ္စည်းများ မရှိသေးပါ သို့မဟုတ် ရှာဖွေမှု မတွေ့ရှိပါ။
                             </td>
                         </tr>
@@ -47,7 +47,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                                             </span>
                                             <div>
                                                 <div className="font-bold text-sm">{product.name}</div>
-                                                <div className="text-xs text-gray-400">
+                                                <div className="text-xs text-base-content/40">
                                                     ID: {product.id}
                                                 </div>
                                             </div>
@@ -62,7 +62,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                                     </td>
 
                                     {/* Cost Price */}
-                                    <td className="text-right font-medium text-gray-500">
+                                    <td className="text-right font-medium text-base-content/50">
                                         {(product.costPrice || 0).toLocaleString()} ကျပ်
                                     </td>
 

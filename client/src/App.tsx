@@ -8,20 +8,23 @@ import { DashboardPage } from './pages/DashboardPage';
 import { StaffPage } from './pages/StaffPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { CategoryManagementPage } from './pages/CategoryManagementPage';
+import { SalesRecordsPage } from './pages/SalesRecordsPage';
 import { useAuth } from './context/AuthContext';
+import { useLanguage } from './context/LanguageContext';
 import { ProductProvider } from './context/ProductContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { CategoryProvider } from './context/CategoryContext';
 
 export default function App() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { t } = useLanguage();
   const [currentPath, setCurrentPath] = useState('pos');
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         <span className="loading loading-spinner loading-lg text-primary"></span>
-        <p className="mt-4 text-sm font-medium text-base-content/70">အချက်အလက် စစ်ဆေးနေပါသည်...</p>
+        <p className="mt-4 text-sm font-medium text-base-content/70">{t('app.checkingAuth')}</p>
       </div>
     );
   }
@@ -30,7 +33,7 @@ export default function App() {
     return <LoginPage />;
   }
 
-  const VALID_PATHS = ['pos', 'inventory', 'categories', 'dashboard', 'staff', 'settings'];
+  const VALID_PATHS = ['pos', 'sales-records', 'inventory', 'categories', 'dashboard', 'staff', 'settings'];
 
   return (
     <SettingsProvider>
@@ -45,6 +48,7 @@ export default function App() {
               <main className="flex-1 p-6">
                 {/* Dynamic Page Rendering */}
                 {currentPath === 'pos' && <PosPage />}
+                {currentPath === 'sales-records' && <SalesRecordsPage />}
                 {currentPath === 'inventory' && <InventoryPage />}
                 {currentPath === 'categories' && <CategoryManagementPage />}
                 {currentPath === 'dashboard' && <DashboardPage />}
@@ -55,8 +59,8 @@ export default function App() {
               {!VALID_PATHS.includes(currentPath) && (
                 <div className="bg-base-100 p-8 rounded-box shadow-xs border border-base-200">
                   <h2 className="text-xl font-bold uppercase">{currentPath} Page</h2>
-                  <p className="text-gray-500 mt-2">
-                    ဒီ စာမျက်နှာကို နောက်အဆင့်တွင် ဆက်လက် ရေးသားပါမည်။
+                  <p className="text-base-content/50 mt-2">
+                    {t('app.fallbackText')}
                   </p>
                 </div>
               )}

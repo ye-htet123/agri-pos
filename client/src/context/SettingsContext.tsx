@@ -8,6 +8,8 @@ export interface StoreSettings {
   receiptHeader: string;
   receiptFooter: string;
   taxRate: number;
+  cultivationDurationDays: number;
+  unpaidDurationDays: number;
 }
 
 interface SettingsContextType {
@@ -23,6 +25,8 @@ const defaultSettings: StoreSettings = {
   receiptHeader: 'စိုက်ပျိုးရေးသုံး ပစ္စည်းမျိုးစုံ လက်လီ/လက်ကား ရောင်းဝယ်ရေး',
   receiptFooter: 'ဝယ်ယူအားပေးမှုကို အထူးကျေးဇူးတင်ရှိပါသည်။',
   taxRate: 0,
+  cultivationDurationDays: 60,
+  unpaidDurationDays: 60,
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -44,6 +48,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             receiptHeader: data.receiptHeader || defaultSettings.receiptHeader,
             receiptFooter: data.receiptFooter || defaultSettings.receiptFooter,
             taxRate: data.taxRate !== undefined ? data.taxRate : 0,
+            cultivationDurationDays:
+              data.cultivationDurationDays !== undefined ? Number(data.cultivationDurationDays) : 60,
+            unpaidDurationDays:
+              data.unpaidDurationDays !== undefined ? Number(data.unpaidDurationDays) : 60,
           });
         }
       } catch (error) {
@@ -65,6 +73,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         receiptHeader: newSettings.receiptHeader,
         receiptFooter: newSettings.receiptFooter,
         taxRate: newSettings.taxRate,
+        cultivationDurationDays: newSettings.cultivationDurationDays,
+        unpaidDurationDays: newSettings.unpaidDurationDays,
       });
 
       if (response.data?.success) {

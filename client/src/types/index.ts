@@ -68,15 +68,36 @@ export interface CartItem {
     quantity: number;
 }
 
+// Order Item with cost price for profit calc
+export interface OrderItem {
+    product: { id: string; name: string; price: number };
+    quantity: number;
+    costPrice?: number;
+    category?: string;
+}
+
 // ငွေရှင်းပြီးစီးသွားသည့် Order/Receipt
 export interface Order {
     id: string;
-    items: CartItem[];
+    orderNo: string;
+    items: OrderItem[];
     totalAmount: number;
     receivedAmount: number;
     changeAmount: number;
+    paymentMethod?: string;
+    paymentStatus: 'PAID' | 'UNPAID';
+    customerName?: string;
+    customerPlace?: string;
+    cultivationDate?: string | null;
+    cultivationStatus?: 'NONE' | 'STARTED' | 'COMPLETED';
     cashierName: string;
     createdAt: string;
+}
+
+// Sales Analytics Summary
+export interface SalesAnalytics {
+    totalRevenue: number;
+    totalProfit: number;
 }
 
 
@@ -91,7 +112,15 @@ export interface ShopSettings {
     phone: string;
     receiptFooter: string;
     taxRate: number; // Percentage (%)
+    cultivationDurationDays: number; // cultivation_duration_days (default: 60)
+    unpaidDurationDays: number;      // unpaid_duration_days (default: 60)
 }
+
+// အခြေအနေ အဆင့် (duration ကုန်လာမှုအပေါ် မူတည်) — အကြွေးနှင့် စိုက်ပျိုးမှု နှစ်ခုစလုံးအတွက်
+export type DurationStage = 'PENDING' | 'UNDER' | 'VALENCE' | 'OVER';
+
+/** @deprecated Use DurationStage instead */
+export type UnpaidStage = DurationStage;
 
 // Admin Dashboard အတွက် အနှစ်ချုပ် စာရင်းအင်း Data
 export interface DashboardStats {

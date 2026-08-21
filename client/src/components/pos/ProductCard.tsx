@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import type { Product } from '../../types';
 import { useCart } from '../../context/CartContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface ProductCardProps {
     product: Product;
@@ -9,6 +10,7 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
     const { cart } = useCart();
+    const { t } = useLanguage();
     const buttonRef = useRef<HTMLButtonElement>(null);
 
     const isOutOfStock = product.stock <= 0;
@@ -79,11 +81,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
                     </span>
                     {isOutOfStock ? (
                         <span className="badge badge-error badge-sm text-white font-bold">
-                            ပစ္စည်းကုန်နေသည်
+                            {t('pos.outOfStock')}
                         </span>
                     ) : (
-                        <span className={`text-xs font-semibold ${isMaxStockInCart ? 'text-amber-600 font-bold' : 'text-gray-500'}`}>
-                            လက်ကျန်: {product.stock} {product.unit}
+                        <span className={`text-xs font-semibold ${isMaxStockInCart ? 'text-warning font-bold' : 'text-base-content/50'}`}>
+                            {t('pos.stockLeft', { stock: product.stock, unit: product.unit })}
                         </span>
                     )}
                 </div>
@@ -95,14 +97,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
                         {product.name}
                     </h3>
                     <p className="text-success font-extrabold text-lg mt-1">
-                        {product.price.toLocaleString()} ကျပ်
+                        {product.price.toLocaleString()} {t('common.kyat')}
                     </p>
 
                     {/* Cart Quantity Badge if item is in cart */}
                     {currentCartQty > 0 && (
                         <div className="mt-1">
-                            <span className={`badge badge-xs text-[11px] font-semibold py-1 px-2 ${isMaxStockInCart ? 'badge-warning text-white' : 'badge-ghost border-green-300 text-green-700 bg-green-50'}`}>
-                                🛒 ခြင်းထဲတွင် {currentCartQty} {product.unit} {isMaxStockInCart ? '(အများဆုံး)' : ''}
+                            <span className={`badge badge-xs text-[11px] font-semibold py-1 px-2 ${isMaxStockInCart ? 'badge-warning text-white' : 'badge-ghost border-success/30 text-success bg-success/10'}`}>
+                                {t('pos.inCart', { qty: currentCartQty, unit: product.unit })} {isMaxStockInCart ? t('pos.maxInCart') : ''}
                             </span>
                         </div>
                     )}
@@ -116,17 +118,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
                         disabled={isOutOfStock || isMaxStockInCart}
                         className={`btn btn-sm w-full font-semibold transition-all ${
                             isOutOfStock
-                                ? 'btn-disabled bg-gray-200 text-gray-400 border-gray-200'
+                                ? 'btn-disabled bg-base-300 text-base-content/40 border-base-300'
                                 : isMaxStockInCart
                                 ? 'btn-warning text-white cursor-not-allowed opacity-80'
                                 : 'btn-success text-white active:scale-95'
                         }`}
                     >
                         {isOutOfStock
-                            ? '🚫 ပစ္စည်းကုန်နေသည်'
+                            ? t('pos.outOfStockLong')
                             : isMaxStockInCart
-                            ? '⚠️ လက်ကျန်ပြည့်ပါပြီ'
-                            : '🛒 ခြင်းထဲထည့်မည်'}
+                            ? t('pos.maxStockReached')
+                            : t('pos.addToCart')}
                     </button>
                 </div>
             </div>

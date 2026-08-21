@@ -66,7 +66,7 @@ export const DashboardPage: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <span className="loading loading-spinner loading-lg text-primary"></span>
-        <p className="mt-4 text-sm text-gray-500 font-medium">Dashboard အချက်အလက်များ ဒေါင်းလုဒ်ဆွဲနေပါသည်...</p>
+        <p className="mt-4 text-sm text-base-content/50 font-medium">Dashboard အချက်အလက်များ ဒေါင်းလုဒ်ဆွဲနေပါသည်...</p>
       </div>
     );
   }
@@ -95,7 +95,7 @@ export const DashboardPage: React.FC = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-base-content">📊 Dashboard အနှစ်ချုပ် စာရင်း</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-base-content/50 mt-1">
             ဆိုင်၏ ယနေ့ အရောင်းနှင့် စတော့ အခြေအနေများကို တိုက်ရိုက် ကြည့်ရှုနိုင်ပါသည်။
           </p>
         </div>
@@ -109,7 +109,7 @@ export const DashboardPage: React.FC = () => {
         {/* Today Sales */}
         <div className="bg-base-100 p-5 rounded-2xl shadow-xs border border-base-200 flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">ယနေ့ အရောင်းရရှိမှု</p>
+            <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">ယနေ့ အရောင်းရရှိမှု</p>
             <h3 className="text-2xl font-black text-success mt-1">{formatCurrency(todaySales)}</h3>
           </div>
           <div className="w-12 h-12 bg-success/10 text-success rounded-xl flex items-center justify-center text-2xl">
@@ -120,8 +120,8 @@ export const DashboardPage: React.FC = () => {
         {/* Today Orders */}
         <div className="bg-base-100 p-5 rounded-2xl shadow-xs border border-base-200 flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">ယနေ့ အော်ဒါ အရေအတွက်</p>
-            <h3 className="text-2xl font-black text-info mt-1">{todayOrdersCount} <span className="text-xs font-normal text-gray-500">စောင်</span></h3>
+            <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">ယနေ့ အော်ဒါ အရေအတွက်</p>
+            <h3 className="text-2xl font-black text-info mt-1">{todayOrdersCount} <span className="text-xs font-normal text-base-content/50">စောင်</span></h3>
           </div>
           <div className="w-12 h-12 bg-info/10 text-info rounded-xl flex items-center justify-center text-2xl">
             🧾
@@ -131,8 +131,8 @@ export const DashboardPage: React.FC = () => {
         {/* Total Products */}
         <div className="bg-base-100 p-5 rounded-2xl shadow-xs border border-base-200 flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">စတော့ ပစ္စည်းမျိုးစုံ</p>
-            <h3 className="text-2xl font-black text-primary mt-1">{totalProductsCount} <span className="text-xs font-normal text-gray-500">မျိုး</span></h3>
+            <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">စတော့ ပစ္စည်းမျိုးစုံ</p>
+            <h3 className="text-2xl font-black text-primary mt-1">{totalProductsCount} <span className="text-xs font-normal text-base-content/50">မျိုး</span></h3>
           </div>
           <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center text-2xl">
             📦
@@ -142,9 +142,9 @@ export const DashboardPage: React.FC = () => {
         {/* Low Stock Warning */}
         <div className="bg-base-100 p-5 rounded-2xl shadow-xs border border-base-200 flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">စတော့ နည်းနေသော ပစ္စည်း</p>
-            <h3 className={`text-2xl font-black mt-1 ${lowStockCount > 0 ? 'text-error' : 'text-gray-700'}`}>
-              {lowStockCount} <span className="text-xs font-normal text-gray-500">မျိုး</span>
+            <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">စတော့ နည်းနေသော ပစ္စည်း</p>
+            <h3 className={`text-2xl font-black mt-1 ${lowStockCount > 0 ? 'text-error' : 'text-base-content/70'}`}>
+              {lowStockCount} <span className="text-xs font-normal text-base-content/50">မျိုး</span>
             </h3>
           </div>
           <div className="w-12 h-12 bg-error/10 text-error rounded-xl flex items-center justify-center text-2xl">
@@ -160,13 +160,13 @@ export const DashboardPage: React.FC = () => {
         <div className="lg:col-span-2 bg-base-100 p-6 rounded-2xl shadow-xs border border-base-200">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold text-lg">🛍️ လတ်တလော အရောင်းမှတ်တမ်းများ</h3>
-            <span className="text-xs text-gray-400">နောက်ဆုံး ရောင်းချမှု ၁၀ ခု</span>
+            <span className="text-xs text-base-content/40">နောက်ဆုံး ရောင်းချမှု ၁၀ ခု</span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="table w-full text-sm">
               <thead>
-                <tr className="border-b border-base-200 text-gray-500">
+                <tr className="border-b border-base-200 text-base-content/50">
                   <th>ပြေစာ အမှတ်</th>
                   <th>အရောင်းဝန်ထမ်း</th>
                   <th>ကျသင့်ငွေ</th>
@@ -176,7 +176,7 @@ export const DashboardPage: React.FC = () => {
               <tbody>
                 {recentOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="text-center py-6 text-gray-400">
+                    <td colSpan={4} className="text-center py-6 text-base-content/40">
                       အရောင်းမှတ်တမ်း မရှိသေးပါ။
                     </td>
                   </tr>
@@ -186,7 +186,7 @@ export const DashboardPage: React.FC = () => {
                       <td className="font-mono font-bold text-xs">#{order.orderNo}</td>
                       <td>{order.cashierName}</td>
                       <td className="font-semibold text-success">{formatCurrency(order.totalAmount)}</td>
-                      <td className="text-xs text-gray-400">{formatTime(order.createdAt)}</td>
+                      <td className="text-xs text-base-content/40">{formatTime(order.createdAt)}</td>
                     </tr>
                   ))
                 )}
@@ -202,7 +202,7 @@ export const DashboardPage: React.FC = () => {
           </h3>
 
           {lowStockProducts.length === 0 ? (
-            <div className="text-center py-8 text-gray-400 text-sm">
+            <div className="text-center py-8 text-base-content/40 text-sm">
               <p>စတော့ ပစ္စည်းအားလုံး လုံလောက်စွာ ရှိပါသည်။</p>
             </div>
           ) : (
@@ -216,7 +216,7 @@ export const DashboardPage: React.FC = () => {
                     <span className="text-xl">{product.image || '🌱'}</span>
                     <div>
                       <p className="font-semibold text-xs text-base-content">{product.name}</p>
-                      <p className="text-[10px] text-gray-400">{product.category}</p>
+                      <p className="text-[10px] text-base-content/40">{product.category}</p>
                     </div>
                   </div>
                   <span className="badge badge-error badge-sm text-white font-bold">

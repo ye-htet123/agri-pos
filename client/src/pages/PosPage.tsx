@@ -4,10 +4,12 @@ import { CartList } from '../components/pos/CartList';
 import { CheckoutModal } from '../components/pos/CheckoutModal';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export const PosPage: React.FC = () => {
     const { user } = useAuth();
     const { cart, totalPrice } = useCart();
+    const { t } = useLanguage();
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
 
@@ -37,7 +39,7 @@ export const PosPage: React.FC = () => {
             <button
                 id="mobile-cart-bar"
                 onClick={() => setIsMobileCartOpen(true)}
-                aria-label="ခြင်းတောင်းကြည့်မည်"
+                aria-label={t('pos.viewCart')}
                 className={`
                     fixed bottom-6 right-5 z-50 lg:hidden
                     w-16 h-16 rounded-full shadow-2xl
@@ -85,17 +87,17 @@ export const PosPage: React.FC = () => {
                 >
                     <div className="truncate">
                         <p className="text-[11px] text-slate-400 font-medium leading-tight">
-                            ခြင်းတောင်းထဲတွင် · {totalItems} မျိုး
+                            {t('pos.mobileCartSummary', { count: totalItems })}
                         </p>
                         <p className="text-base font-extrabold text-emerald-400 truncate leading-tight mt-0.5">
-                            {totalPrice.toLocaleString()} ကျပ်
+                            {totalPrice.toLocaleString()} {t('common.kyat')}
                         </p>
                     </div>
                     <button
                         onClick={(e) => { e.stopPropagation(); setIsCheckoutOpen(true); }}
                         className="btn btn-success btn-sm text-white font-bold text-xs px-3 flex-shrink-0 ml-2"
                     >
-                        ငွေရှင်းမည် 💳
+                        {t('pos.checkout')} 💳
                     </button>
                 </div>
             )}
@@ -135,7 +137,7 @@ export const PosPage: React.FC = () => {
                 isOpen={isCheckoutOpen}
                 onClose={() => setIsCheckoutOpen(false)}
                 onSuccess={() => setIsCheckoutOpen(false)}
-                cashierName={user?.name || 'အော်ပရေတာ'}
+                cashierName={user?.name || t('pos.cashierDefault')}
             />
         </div>
     );

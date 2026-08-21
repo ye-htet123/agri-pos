@@ -4,6 +4,7 @@
   "description": "Backend API for Agri-POS MERN Application",
   "main": "dist/server.js",
   "scripts": {
+    "predev": "npx --yes kill-port 5001",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js"
