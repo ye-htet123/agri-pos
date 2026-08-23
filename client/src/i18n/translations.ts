@@ -119,6 +119,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'checkout.unpaidNote': '⏳ အကြွေးအနေဖြင့် မှတ်တမ်းတင်မည်ဖြစ်ပါသည်။',
     'checkout.requiredForCredit': 'အကြွေးအတွက် လိုအပ်',
     'checkout.creditRequiresCustomer': 'အကြွေးကျန်ဖြင့် ရောင်းချပါက ဝယ်ယူသူ အမည်နှင့် ဖုန်းနံပါတ် ဖြည့်သွင်းရန် လိုအပ်ပါသည်',
+    'checkout.creditChannelNote': 'အကြွေးကျန် — ငွေပေးချေမှု နည်းလမ်း ရွေးရန် မလိုပါ',
     'checkout.operator': 'အော်ပရေတာ',
     'checkout.confirm': 'ငွေရှင်းမှု အတည်ပြုမည်',
     'checkout.processing': 'ငွေရှင်းနေသည်...',
@@ -184,6 +185,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     'sales.fromDate': 'စတင်ရက်',
     'sales.toDate': 'ကုန်ဆုံးရက်',
     'sales.clearDates': 'ရက်စွဲ ပြန်ရှင်းမည်',
+    'sales.cultivationFilter': 'စိုက်ပျိုးမှု အခြေအနေ',
+    'sales.cultStarted': 'စိုက်ပျိုးပြီး',
 
     // ── analytics ───────────────────────────────────────────
     'analytics.title': 'အရောင်း ခွဲခြမ်းစိတ်ဖြာမှု (Analytics)',
@@ -410,6 +413,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'orderEdit.cultivationDateLabel': 'စိုက်ပျိုးမည့်ရက်စွဲ',
     'orderEdit.startBtn': '🌱 စတင်စိုက် (Start Cultivation)',
     'orderEdit.markDoneBtn': '✅ စိုက်ပျိုးမှု ပြီးစီးပြီး (Mark as Done)',
+    'orderEdit.pendingNote': 'စောင့်ဆိုင်းဆဲ — ပြီးစီးခလုတ်ကို ကာလပြည့်မှသာ အသုံးပြုနိုင်ပါမည်',
     'orderEdit.dateRequired': 'စိုက်ပျိုးမည့်ရက်စွဲ ရွေးချယ်ပါ။',
     'orderEdit.paidSuccess': 'ငွေပေးချေမှု အောင်မြင်စွာ မှတ်တမ်းတင်ပြီးပါပြီ။',
     'orderEdit.startSuccess': 'စိုက်ပျိုးမှု စတင်ပြီးပါပြီ။',
@@ -527,6 +531,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'checkout.change': 'Change:',
     'checkout.changeShort': 'Received amount is not enough.',
     'checkout.unpaidNote': '⏳ This order will be recorded as credit (unpaid).',
+    'checkout.creditChannelNote': 'Credit — no payment channel selection needed.',
     'checkout.requiredForCredit': 'Required for credit',
     'checkout.creditRequiresCustomer': 'Credit sales require the customer name and phone number.',
     'checkout.operator': 'Cashier',
@@ -594,6 +599,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     'sales.fromDate': 'From date',
     'sales.toDate': 'To date',
     'sales.clearDates': 'Clear dates',
+    'sales.cultivationFilter': 'Cultivation Status',
+    'sales.cultStarted': 'Started',
 
     // ── analytics ───────────────────────────────────────────
     'analytics.title': 'Sales Analytics',
@@ -820,6 +827,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'orderEdit.cultivationDateLabel': 'Cultivation start date',
     'orderEdit.startBtn': '🌱 Start Cultivation',
     'orderEdit.markDoneBtn': '✅ Mark as Done',
+    'orderEdit.pendingNote': 'Pending — the complete button unlocks once the duration is reached.',
     'orderEdit.dateRequired': 'Please choose a cultivation date.',
     'orderEdit.paidSuccess': 'Payment recorded successfully.',
     'orderEdit.startSuccess': 'Cultivation started.',

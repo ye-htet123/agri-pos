@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import type { Order } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
+import { useSettings } from '../../context/SettingsContext';
 import api from '../../services/api';
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 interface OrderEditModalProps {
   isOpen: boolean;
@@ -17,6 +20,7 @@ export const OrderEditModal: React.FC<OrderEditModalProps> = ({
   onUpdated,
 }) => {
   const { t } = useLanguage();
+  const { settings } = useSettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cultivationDate, setCultivationDate] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -32,6 +36,13 @@ export const OrderEditModal: React.FC<OrderEditModalProps> = ({
   const isUnpaid = order.paymentStatus === 'UNPAID';
   const isCultivationActive = order.cultivationStatus === 'STARTED';
   const isCultivationDone = order.cultivationStatus === 'COMPLETED';
+  // Completion allowed only once the duration threshold is reached
+  // (UNDER / VALENCE / OVER) — hidden while PENDING
+  const cultivationElapsedDays = order.cultivationDate
+    ? Math.floor((Date.now() - new Date(order.cultivationDate).getTime()) / MS_PER_DAY)
+    : 0;
+  const canCompleteCultivation =
+    cultivationElapsedDays >= (settings.cultivationDurationDays ?? 60);
 
   const finishWithSuccess = (message: string) => {
     setSuccessMessage(message);
@@ -248,20 +259,27 @@ export const OrderEditModal: React.FC<OrderEditModalProps> = ({
                       </span>
                     )}
                   </div>
-                  <button
-                    onClick={handleMarkCultivationDone}
-                    disabled={isSubmitting}
-                    className="btn btn-success btn-sm text-white font-bold w-full gap-2"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <span className="loading loading-spinner loading-xs"></span>
-                        {t('orderEdit.recording')}
-                      </>
-                    ) : (
-                      t('orderEdit.markDoneBtn')
-                    )}
-                  </button>
+                  {canCompleteCultivation && (
+                    <button
+                      onClick={handleMarkCultivationDone}
+                      disabled={isSubmitting}
+                      className="btn btn-success btn-sm text-white font-bold w-full gap-2"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <span className="loading loading-spinner loading-xs"></span>
+                          {t('orderEdit.recording')}
+                        </>
+                      ) : (
+                        t('orderEdit.markDoneBtn')
+                      )}
+                    </button>
+                  )}
+                  {!canCompleteCultivation && (
+                    <p className="text-[11px] text-base-content/50 text-center">
+                      ⏳ {t('orderEdit.pendingNote')}
+                    </p>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-3">

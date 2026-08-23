@@ -376,22 +376,30 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 </div>
               </div>
 
-              {/* Payment Method Selection */}
-              <div className="form-control">
-                <label className="label py-1">
-                  <span className="label-text text-xs font-semibold">ငွေပေးချေမှု နည်းလမ်း</span>
-                </label>
-                <select
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="select select-bordered select-sm w-full font-bold"
-                >
-                  <option value="CASH">💵 တိုက်ရိုက် ငွေသား (CASH)</option>
-                  <option value="KPAY">📱 KPay</option>
-                  <option value="WAVEPAY">🌊 Wave Money</option>
-                  <option value="CARD">💳 ကတ်ဖြင့် ပေးချေမည် (Card)</option>
-                </select>
-              </div>
+              {/* Payment Method Selection — hidden for credit sales;
+                  the channel defaults to credit itself */}
+              {paymentStatus === 'UNPAID' ? (
+                <div className="flex justify-between items-center text-sm bg-warning/10 border border-warning/30 rounded-lg px-3 py-2">
+                  <span className="font-semibold">💳 {t('checkout.paymentMethod')}</span>
+                  <span className="font-bold text-warning">⏳ {t('checkout.creditChannelNote')}</span>
+                </div>
+              ) : (
+                <div className="form-control">
+                  <label className="label py-1">
+                    <span className="label-text text-xs font-semibold">ငွေပေးချေမှု နည်းလမ်း</span>
+                  </label>
+                  <select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="select select-bordered select-sm w-full font-bold"
+                  >
+                    <option value="CASH">💵 တိုက်ရိုက် ငွေသား (CASH)</option>
+                    <option value="KPAY">📱 KPay</option>
+                    <option value="WAVEPAY">🌊 Wave Money</option>
+                    <option value="CARD">💳 ကတ်ဖြင့် ပေးချေမည် (Card)</option>
+                  </select>
+                </div>
+              )}
 
               {/* Conditionally show Amount Received — only for PAID */}
               {paymentStatus === 'PAID' && (

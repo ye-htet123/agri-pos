@@ -71,6 +71,7 @@ export const SalesRecordsPage: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [editOrder, setEditOrder] = useState<Order | null>(null);
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'PAID' | 'UNPAID'>('ALL');
+  const [filterCultivation, setFilterCultivation] = useState<'ALL' | 'NOT_STARTED' | 'STARTED'>('ALL');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [markingPaidId, setMarkingPaidId] = useState<string | null>(null);
@@ -117,9 +118,20 @@ export const SalesRecordsPage: React.FC = () => {
     return true;
   };
 
-  const filteredOrders = orders.filter(
-    (o) => (filterStatus === 'ALL' || o.paymentStatus === filterStatus) && isInDateRange(o)
-  );
+  const filteredOrders = orders
+    .filter((o) => (filterStatus === 'ALL' || o.paymentStatus === filterStatus) && isInDateRange(o))
+    .filter((o) => {
+      if (filterCultivation === 'ALL') return true;
+      const started = o.cultivationStatus === 'STARTED' || o.cultivationStatus === 'COMPLETED';
+      if (filterCultivation === 'STARTED') return started;
+      // NOT_STARTED: crop-seed orders that have not been planted yet
+      return (
+        !started &&
+        o.items.some(
+          (item) => item.category?.includes('မျိုးစေ့') || item.category?.toLowerCase().includes('cropseeds')
+        )
+      );
+    });
 
   // Selection handlers
   const toggleSelectAll = () => {
@@ -325,6 +337,24 @@ export const SalesRecordsPage: React.FC = () => {
           )}
         </div>
 
+        {/* Cultivation Status Filter */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold text-base-content/60">🌱 {t('sales.cultivationFilter')}:</span>
+          <select
+            aria-label={t('sales.cultivationFilter')}
+            className="select select-bordered select-sm font-semibold"
+            value={filterCultivation}
+            onChange={(e) => {
+              setFilterCultivation(e.target.value as 'ALL' | 'NOT_STARTED' | 'STARTED');
+              setSelectedIds(new Set());
+            }}
+          >
+            <option value="ALL">{t('sales.filterAll')}</option>
+            <option value="NOT_STARTED">{t('sales.notStarted')}</option>
+            <option value="STARTED">{t('sales.cultStarted')}</option>
+          </select>
+        </div>
+
         <div className="flex flex-wrap items-center gap-3">
           {/* Duration Legend */}
           <div className="flex flex-wrap items-center gap-2 text-[11px] text-base-content/60" title={t('sales.legendTitle')}>
@@ -478,18 +508,22 @@ export const SalesRecordsPage: React.FC = () => {
                     ) : cultivation ? (
                       <div className="flex flex-col items-center gap-0.5">
                         <StageBadge stage={cultivation.stage} elapsedDays={cultivation.elapsedDays} />
-                        <button
-                          onClick={() => handleMarkCultivationDone(order)}
-                          disabled={isMarkingDone}
-                          title={t('sales.markDoneTitle')}
-                          className="btn btn-success btn-xs text-white font-bold gap-1"
-                        >
-                          {isMarkingDone ? (
-                            <span className="loading loading-spinner loading-xs"></span>
-                          ) : (
-                            t('sales.doneBtn')
-                          )}
-                        </button>
+                        {/* Completion action only once the duration threshold is
+                            reached (UNDER / VALENCE / OVER) — hidden while PENDING */}
+                        {cultivation.stage !== 'PENDING' && (
+                          <button
+                            onClick={() => handleMarkCultivationDone(order)}
+                            disabled={isMarkingDone}
+                            title={t('sales.markDoneTitle')}
+                            className="btn btn-success btn-xs text-white font-bold gap-1"
+                          >
+                            {isMarkingDone ? (
+                              <span className="loading loading-spinner loading-xs"></span>
+                            ) : (
+                              t('sales.doneBtn')
+                            )}
+                          </button>
+                        )}
                       </div>
                     ) : hasCropSeeds(order) ? (
                       <span className="badge badge-sm badge-ghost gap-1">⏳ {t('sales.notStarted')}</span>
