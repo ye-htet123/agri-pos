@@ -30,6 +30,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
             roles: ['ADMIN'],
         },
         {
+            id: 'customers',
+            labelKey: 'sidebar.customers',
+            icon: '📇',
+            roles: ['ADMIN'],
+        },
+        {
             id: 'inventory',
             labelKey: 'sidebar.inventory',
             icon: '📦',
@@ -45,6 +51,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
             id: 'dashboard',
             labelKey: 'sidebar.dashboard',
             icon: '📊',
+            roles: ['ADMIN'],
+        },
+        {
+            id: 'analytics',
+            labelKey: 'sidebar.analytics',
+            icon: '📈',
             roles: ['ADMIN'],
         },
         {

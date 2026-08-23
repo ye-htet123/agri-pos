@@ -81,12 +81,16 @@ export interface Order {
     id: string;
     orderNo: string;
     items: OrderItem[];
+    subtotal?: number;
+    taxRate?: number;
+    taxAmount?: number;
     totalAmount: number;
     receivedAmount: number;
     changeAmount: number;
     paymentMethod?: string;
     paymentStatus: 'PAID' | 'UNPAID';
     customerName?: string;
+    customerPhone?: string;
     customerPlace?: string;
     cultivationDate?: string | null;
     cultivationStatus?: 'NONE' | 'STARTED' | 'COMPLETED';
@@ -98,6 +102,39 @@ export interface Order {
 export interface SalesAnalytics {
     totalRevenue: number;
     totalProfit: number;
+}
+
+// ==========================================
+// 4. CUSTOMER TYPES (ဝယ်ယူသူများ)
+// ==========================================
+
+// ဝယ်ယူသူ စာရင်း အတန်း (list view — purchaseDates payload မပါဝင်ပါ)
+export interface Customer {
+    id: string;
+    name: string;
+    phone: string;
+    address: string;
+    totalSpent: number;
+    totalDebt: number;
+    purchasesCount: number;
+    lastPurchaseDate: string | null;
+}
+
+// Checkout modal မှ ဖုန်းနံပါတ်ဖြင့် ရှာဖွေရာတွင် ပြန်ရရှိသည့် အချက်အလက်
+export interface CustomerLookup extends Omit<Customer, 'lastPurchaseDate'> {}
+// ဝယ်ယူခဲ့သည့် ရက်စွဲများ မှတ်တမ်း (detail modal)
+export interface CustomerHistoryItem {
+    orderId: string;
+    orderNo: string;
+    amount: number;
+    date: string | null;
+    paymentStatus: 'PAID' | 'UNPAID';
+    itemsSummary: string;
+    cashierName?: string;
+}
+
+export interface CustomerDetail extends Omit<Customer, 'lastPurchaseDate'> {
+    history: CustomerHistoryItem[];
 }
 
 

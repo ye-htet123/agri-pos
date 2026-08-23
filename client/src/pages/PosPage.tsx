@@ -4,11 +4,13 @@ import { CartList } from '../components/pos/CartList';
 import { CheckoutModal } from '../components/pos/CheckoutModal';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useSettings } from '../context/SettingsContext';
 import { useLanguage } from '../context/LanguageContext';
 
 export const PosPage: React.FC = () => {
     const { user } = useAuth();
     const { cart, totalPrice } = useCart();
+    const { settings } = useSettings();
     const { t } = useLanguage();
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
@@ -16,16 +18,21 @@ export const PosPage: React.FC = () => {
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     const hasItems = cart.length > 0;
 
+    // Tax-inclusive grand total (same formula as CartList / server)
+    const taxRate = settings.taxRate || 0;
+    const taxAmount = Math.round(totalPrice * (taxRate / 100) * 100) / 100;
+    const grandTotal = Math.round((totalPrice + taxAmount) * 100) / 100;
+
     return (
         <div className="relative min-h-[calc(100vh-100px)]">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full items-start">
                 {/* Products Selection Area */}
-                <div className="lg:col-span-2 h-full overflow-y-auto pr-1">
+                <div className="lg:col-span-2 lg:max-h-[calc(100vh-120px)] overflow-y-auto pr-1">
                     <ProductList />
                 </div>
 
-                {/* Cart Side Panel — Desktop only */}
-                <div className="hidden lg:block lg:col-span-1 h-full">
+                {/* Cart Side Panel — Desktop only; height adapts to cart content (max 80vh) */}
+                <div className="hidden lg:block lg:col-span-1 self-start">
                     <CartList onOpenCheckout={() => setIsCheckoutOpen(true)} />
                 </div>
             </div>
@@ -90,7 +97,10 @@ export const PosPage: React.FC = () => {
                             {t('pos.mobileCartSummary', { count: totalItems })}
                         </p>
                         <p className="text-base font-extrabold text-emerald-400 truncate leading-tight mt-0.5">
-                            {totalPrice.toLocaleString()} {t('common.kyat')}
+                            {grandTotal.toLocaleString()} {t('common.kyat')}
+                            {taxRate > 0 && (
+                                <span className="text-[10px] font-medium text-slate-400 ml-1">(အခွန် ပါဝင်ပါသည်)</span>
+                            )}
                         </p>
                     </div>
                     <button

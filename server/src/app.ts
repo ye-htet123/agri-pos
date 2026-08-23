@@ -10,6 +10,7 @@ import orderRoutes from './routes/orderRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
 import settingRoutes from './routes/settingRoutes';
 import categoryRoutes from './routes/categoryRoutes';
+import customerRoutes from './routes/customerRoutes';
 import { errorHandlerMiddleware } from './middlewares/errorHandlerMiddleware';
 
 const app: Application = express();
@@ -49,6 +50,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Ultra-lightweight keep-alive ping (no DB/Redis access).
+// Used by the client on app mount to wake a sleeping Render free-tier dyno
+// before the user submits the login form.
+app.get(['/api/ping', '/api/v1/ping'], (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // Base Route Health Check
 app.get('/api/v1/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Agri-POS API Server is running smoothly' });
@@ -62,6 +70,7 @@ app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/settings', settingRoutes);
 app.use('/api/v1/categories', categoryRoutes);
+app.use('/api/v1/customers', customerRoutes);
 
 // Global Error Handler
 app.use(errorHandlerMiddleware);

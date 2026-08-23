@@ -7,7 +7,9 @@ interface CheckoutOptions {
   receivedAmount: number;
   paymentMethod?: string;
   paymentStatus?: 'PAID' | 'UNPAID';
+  paymentType?: 'PAID' | 'CREDIT';
   customerName?: string;
+  customerPhone?: string;
   customerPlace?: string;
 }
 
@@ -109,7 +111,15 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const checkout = async (options: CheckoutOptions) => {
     try {
-      const { receivedAmount, paymentMethod = 'CASH', paymentStatus = 'PAID', customerName, customerPlace } = options;
+      const {
+        receivedAmount,
+        paymentMethod = 'CASH',
+        paymentStatus = 'PAID',
+        paymentType,
+        customerName,
+        customerPhone,
+        customerPlace,
+      } = options;
 
       const payload = {
         items: cart.map((item) => ({
@@ -120,7 +130,10 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         receivedAmount,
         paymentMethod,
         paymentStatus,
+        // Explicit credit flag — server treats CREDIT === UNPAID
+        paymentType: paymentType || (paymentStatus === 'UNPAID' ? 'CREDIT' : 'PAID'),
         customerName: customerName || '',
+        customerPhone: (customerPhone || '').trim(),
         customerPlace: customerPlace || '',
       };
 

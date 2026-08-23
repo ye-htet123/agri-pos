@@ -13,6 +13,9 @@ export interface IOrderItem {
 export interface IOrder extends Document {
   orderNo: string;
   items: IOrderItem[];
+  subtotal: number;
+  taxRate: number;
+  taxAmount: number;
   totalAmount: number;
   receivedAmount: number;
   changeAmount: number;
@@ -20,6 +23,7 @@ export interface IOrder extends Document {
   paymentStatus: 'PAID' | 'UNPAID';
   status: 'COMPLETED' | 'CANCELLED';
   customerName?: string;
+  customerPhone?: string;
   customerPlace?: string;
   cultivationDate?: Date | null;
   cultivationStatus: 'NONE' | 'STARTED' | 'COMPLETED';
@@ -41,6 +45,9 @@ const OrderSchema: Schema = new Schema(
   {
     orderNo: { type: String, required: true, unique: true },
     items: [OrderItemSchema],
+    subtotal: { type: Number, default: 0 },
+    taxRate: { type: Number, default: 0 },
+    taxAmount: { type: Number, default: 0 },
     totalAmount: { type: Number, required: true },
     receivedAmount: { type: Number, required: true },
     changeAmount: { type: Number, required: true, default: 0 },
@@ -60,6 +67,7 @@ const OrderSchema: Schema = new Schema(
       default: 'COMPLETED',
     },
     customerName: { type: String, default: '' },
+    customerPhone: { type: String, default: '', trim: true },
     customerPlace: { type: String, default: '' },
     cultivationDate: { type: Date, default: null },
     cultivationStatus: {

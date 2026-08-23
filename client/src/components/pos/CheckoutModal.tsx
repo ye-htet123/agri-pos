@@ -1,8 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { useCart } from '../../context/CartContext';
 import { useSettings } from '../../context/SettingsContext';
 import { useProducts } from '../../context/ProductContext';
+import { useLanguage } from '../../context/LanguageContext';
+import type { CustomerLookup } from '../../types';
+import api from '../../services/api';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -19,12 +22,16 @@ interface CompletedOrderSnapshot {
     price: number;
     subtotal: number;
   }>;
+  subtotal: number;
+  taxRate: number;
+  taxAmount: number;
   totalAmount: number;
   receivedAmount: number;
   changeAmount: number;
   paymentMethod: string;
   paymentStatus: string;
   customerName: string;
+  customerPhone: string;
   customerPlace: string;
   cashierName: string;
   createdAt: Date | string;
@@ -39,12 +46,16 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const { cart, totalPrice, checkout, clearCart } = useCart();
   const { settings } = useSettings();
   const { refreshProducts } = useProducts();
+  const { t } = useLanguage();
 
   const [receivedAmount, setReceivedAmount] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<string>('CASH');
   const [paymentStatus, setPaymentStatus] = useState<'PAID' | 'UNPAID'>('PAID');
   const [customerName, setCustomerName] = useState<string>('');
+  const [customerPhone, setCustomerPhone] = useState<string>('');
   const [customerPlace, setCustomerPlace] = useState<string>('');
+  // Returning customer auto-filled from a phone number lookup (null = new/guest)
+  const [matchedCustomer, setMatchedCustomer] = useState<CustomerLookup | null>(null);
   const [showCustomerPopup, setShowCustomerPopup] = useState<boolean>(false);
   const [isPaid, setIsPaid] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -70,22 +81,67 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     setReceivedAmount('');
     setPaymentStatus('PAID');
     setCustomerName('');
+    setCustomerPhone('');
     setCustomerPlace('');
+    setMatchedCustomer(null);
     setShowCustomerPopup(false);
     setIsPaid(false);
     setCompletedOrder(null);
     setErrorMessage(null);
   };
 
+  // Debounced phone lookup — auto-fill the name when the number is known
+  useEffect(() => {
+    if (!isOpen || isPaid) return;
+    const digits = customerPhone.trim();
+    if (digits.length < 6) {
+      setMatchedCustomer(null);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.get('/customers/lookup', { params: { phone: digits } });
+        if (res.data?.success && res.data?.data) {
+          const found = res.data.data as CustomerLookup;
+          setMatchedCustomer(found);
+          if (found.name) setCustomerName((prev) => prev || found.name);
+          if (found.address) setCustomerPlace((prev) => prev || found.address);
+        } else {
+          setMatchedCustomer(null);
+        }
+      } catch {
+        setMatchedCustomer(null);
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [customerPhone, isOpen, isPaid]);
+
+  // Credit sale ("အကြွေးကျန်") always demands the customer info box up front.
+  // Paid sales never auto-open it — the 👤 button opens it manually.
+  useEffect(() => {
+    if (!isOpen || isPaid) return;
+    if (paymentStatus === 'UNPAID') setShowCustomerPopup(true);
+  }, [paymentStatus, isOpen, isPaid]);
+
   if (!isOpen) return null;
 
-  const numericReceived = parseFloat(receivedAmount) || 0;
-  const changeAmount = numericReceived - totalPrice;
+  // Tax comes from the active store setting (server recomputes it on checkout)
+  const taxRate = settings.taxRate || 0;
+  const taxAmount = Math.round(totalPrice * (taxRate / 100) * 100) / 100;
+  const grandTotal = Math.round((totalPrice + taxAmount) * 100) / 100;
 
-  // Validation: PAID requires sufficient received amount; UNPAID can proceed directly
+  const numericReceived = parseFloat(receivedAmount) || 0;
+  const changeAmount = numericReceived - grandTotal;
+
+  // Credit sales strictly require the customer's name AND phone number
+  const creditDetailsMissing =
+    paymentStatus === 'UNPAID' && (!customerName.trim() || !customerPhone.trim());
+
+  // Validation: PAID requires sufficient received amount; UNPAID can proceed
+  // directly but demands complete customer details
   const isValid = paymentStatus === 'UNPAID'
-    ? totalPrice > 0 && !isSubmitting
-    : numericReceived >= totalPrice && totalPrice > 0 && !isSubmitting;
+    ? grandTotal > 0 && !isSubmitting && !creditDetailsMissing
+    : numericReceived >= grandTotal && grandTotal > 0 && !isSubmitting;
 
   const handleConfirmPayment = async () => {
     if (!isValid) return;
@@ -97,7 +153,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       receivedAmount: paymentStatus === 'UNPAID' ? 0 : numericReceived,
       paymentMethod,
       paymentStatus,
+      paymentType: paymentStatus === 'UNPAID' ? 'CREDIT' : 'PAID',
       customerName: customerName.trim(),
+      customerPhone: customerPhone.trim(),
       customerPlace: customerPlace.trim(),
     });
 
@@ -123,12 +181,16 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               price: item.product.price,
               subtotal: item.product.price * item.quantity,
             })),
-        totalAmount: orderData?.totalAmount ?? totalPrice,
+        totalAmount: orderData?.totalAmount ?? grandTotal,
+        subtotal: orderData?.subtotal ?? totalPrice,
+        taxRate: orderData?.taxRate ?? taxRate,
+        taxAmount: orderData?.taxAmount ?? taxAmount,
         receivedAmount: orderData?.receivedAmount ?? (paymentStatus === 'UNPAID' ? 0 : numericReceived),
         changeAmount: orderData?.changeAmount ?? (paymentStatus === 'UNPAID' ? 0 : changeAmount),
         paymentMethod: orderData?.paymentMethod || paymentMethod,
         paymentStatus: orderData?.paymentStatus || paymentStatus,
         customerName: orderData?.customerName || customerName,
+        customerPhone: orderData?.customerPhone || customerPhone.trim(),
         customerPlace: orderData?.customerPlace || customerPlace,
         cashierName: orderData?.cashierName || cashierName,
         createdAt: orderData?.createdAt || new Date(),
@@ -171,7 +233,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <button
                 onClick={() => setShowCustomerPopup(!showCustomerPopup)}
                 className={`btn btn-sm btn-circle ${
-                  customerName || customerPlace
+                  creditDetailsMissing
+                    ? 'btn-error text-white animate-pulse'
+                    : customerName || customerPhone || customerPlace
                     ? 'btn-success text-white'
                     : 'btn-ghost text-base-content/60'
                 }`}
@@ -185,28 +249,64 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             {showCustomerPopup && (
               <div className="bg-base-200/70 rounded-xl p-3 mb-4 space-y-2 border border-base-300 animate-in fade-in duration-200">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold text-base-content/70">👤 ဝယ်ယူသူ အချက်အလက်</span>
+                  <span className="text-xs font-bold text-base-content/70">
+                    👤 {t('checkout.customerInfo')}
+                    {paymentStatus === 'UNPAID' && (
+                      <span className="text-error ml-1">({t('checkout.requiredForCredit')})</span>
+                    )}
+                  </span>
                   <button
                     onClick={() => setShowCustomerPopup(false)}
-                    className="btn btn-ghost btn-xs btn-circle"
+                    disabled={paymentStatus === 'UNPAID'}
+                    title={paymentStatus === 'UNPAID' ? t('checkout.requiredForCredit') : undefined}
+                    className="btn btn-ghost btn-xs btn-circle disabled:opacity-40"
                   >
                     ✕
                   </button>
                 </div>
                 <input
+                  type="tel"
+                  inputMode="tel"
+                  placeholder={t('checkout.customerPhonePh')}
+                  className={`input input-bordered input-sm w-full font-mono ${
+                    paymentStatus === 'UNPAID' && !customerPhone.trim() ? 'input-error' : ''
+                  }`}
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                />
+                {/* Returning-customer match indicator */}
+                {matchedCustomer && (
+                  <div className="alert bg-success/10 border-success/30 py-1.5 px-3 text-xs rounded-lg">
+                    <span className="text-success font-semibold">
+                      ✓ {t('checkout.phoneFound', {
+                        name: matchedCustomer.name || t('checkout.unnamedCustomer'),
+                        count: matchedCustomer.purchasesCount,
+                      })}
+                    </span>
+                  </div>
+                )}
+                <input
                   type="text"
-                  placeholder="ဝယ်ယူသူ အမည် (ထည့်ရန် မလိုပါ)"
-                  className="input input-bordered input-sm w-full"
+                  placeholder={t('checkout.customerNamePh')}
+                  className={`input input-bordered input-sm w-full ${
+                    paymentStatus === 'UNPAID' && !customerName.trim() ? 'input-error' : ''
+                  }`}
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                 />
                 <input
                   type="text"
-                  placeholder="နေရပ်/ဒေသ (ထည့်ရန် မလိုပါ)"
+                  placeholder={t('checkout.customerPlacePh')}
                   className="input input-bordered input-sm w-full"
                   value={customerPlace}
                   onChange={(e) => setCustomerPlace(e.target.value)}
                 />
+                {/* Credit validation warning */}
+                {creditDetailsMissing && (
+                  <div className="alert bg-warning/10 border-warning/30 py-1.5 px-3 text-xs rounded-lg">
+                    <span className="text-warning font-semibold">⚠️ {t('checkout.creditRequiresCustomer')}</span>
+                  </div>
+                )}
               </div>
             )}
 
@@ -232,9 +332,19 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
             {/* Calculation Details */}
             <div className="space-y-3 border-t border-base-200 pt-3">
-              <div className="flex justify-between text-base font-bold">
-                <span>ကျသင့်ငွေ:</span>
-                <span className="text-success">{totalPrice.toLocaleString()} ကျပ်</span>
+              <div className="space-y-1.5 text-sm">
+                <div className="flex justify-between font-medium">
+                  <span className="text-base-content/70">ကျသင့်ငွေ (Subtotal):</span>
+                  <span className="font-semibold text-base-content/80">{totalPrice.toLocaleString()} ကျပ်</span>
+                </div>
+                <div className="flex justify-between font-medium">
+                  <span className="text-base-content/70">အခွန် ({taxRate}%):</span>
+                  <span className="font-semibold text-base-content/80">{taxAmount.toLocaleString()} ကျပ်</span>
+                </div>
+              </div>
+              <div className="flex justify-between text-base font-bold pt-2 border-t border-dashed border-base-200">
+                <span>စုစုပေါင်း (Grand Total):</span>
+                <span className="text-success">{grandTotal.toLocaleString()} ကျပ်</span>
               </div>
 
               {/* Payment Status Toggle (PAID / UNPAID) */}
@@ -390,10 +500,27 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     </span>
                   </div>
                   {/* Customer Info on Receipt */}
-                  {(completedOrder.customerName || completedOrder.customerPlace) && (
-                    <div className="flex justify-between pt-1">
-                      {completedOrder.customerName && <span>ဝယ်ယူသူ: {completedOrder.customerName}</span>}
-                      {completedOrder.customerPlace && <span>နေရပ်: {completedOrder.customerPlace}</span>}
+                  {(completedOrder.customerName || completedOrder.customerPhone || completedOrder.customerPlace) && (
+                    <div className="pt-1 space-y-0.5">
+                      {completedOrder.customerName && (
+                        <div className="flex justify-between">
+                          <span>ဝယ်ယူသူ: {completedOrder.customerName}</span>
+                          {completedOrder.customerPhone && (
+                            <span>ဖုန်းနံပါတ်: {completedOrder.customerPhone}</span>
+                          )}
+                        </div>
+                      )}
+                      {!completedOrder.customerName && completedOrder.customerPhone && (
+                        <div className="flex justify-between">
+                          <span>ဝယ်ယူသူ: —</span>
+                          <span>ဖုန်းနံပါတ်: {completedOrder.customerPhone}</span>
+                        </div>
+                      )}
+                      {completedOrder.customerPlace && (
+                        <div className="flex justify-between">
+                          <span>နေရပ်: {completedOrder.customerPlace}</span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -421,8 +548,18 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
                 {/* Calculation Summary */}
                 <div className="space-y-1 text-black">
+                  <div className="flex justify-between">
+                    <span>ကျသင့်ငွေ (Subtotal):</span>
+                    <span>{(completedOrder.subtotal || completedOrder.totalAmount).toLocaleString()} ကျပ်</span>
+                  </div>
+                  {(completedOrder.taxRate ?? 0) > 0 && (
+                    <div className="flex justify-between">
+                      <span>အခွန် ({completedOrder.taxRate}%):</span>
+                      <span>{(completedOrder.taxAmount || 0).toLocaleString()} ကျပ်</span>
+                    </div>
+                  )}
                   <div className="flex justify-between font-bold">
-                    <span>စုစုပေါင်း:</span>
+                    <span>စုစုပေါင်း (Grand Total):</span>
                     <span>{completedOrder.totalAmount.toLocaleString()} ကျပ်</span>
                   </div>
                   {completedOrder.paymentStatus === 'PAID' && (

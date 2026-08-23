@@ -1,5 +1,6 @@
 import React from 'react';
 import { useCart } from '../../context/CartContext';
+import { useSettings } from '../../context/SettingsContext';
 import { useLanguage } from '../../context/LanguageContext';
 
 interface CartListProps {
@@ -9,9 +10,15 @@ interface CartListProps {
 
 export const CartList: React.FC<CartListProps> = ({ onOpenCheckout, onClose }) => {
     const { cart, removeFromCart, updateQuantity, clearCart, totalPrice, showToast } = useCart();
+    const { settings } = useSettings();
     const { t } = useLanguage();
 
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+    // Tax from the active store setting: tax = subtotal * rate / 100
+    const taxRate = settings.taxRate || 0;
+    const taxAmount = Math.round(totalPrice * (taxRate / 100) * 100) / 100;
+    const grandTotal = Math.round((totalPrice + taxAmount) * 100) / 100;
 
     const handleIncrement = (productName: string, currentQty: number, stock: number, unit: string, productId: string) => {
         if (currentQty >= stock) {
@@ -29,10 +36,10 @@ export const CartList: React.FC<CartListProps> = ({ onOpenCheckout, onClose }) =
     return (
         <div
             id="pos-cart-container"
-            className="bg-base-100 rounded-xl border border-base-200 p-4 flex flex-col h-full justify-between shadow-xs relative"
+            className="bg-base-100 rounded-xl border border-base-200 p-4 flex flex-col h-auto max-h-[80vh] shadow-xs relative"
         >
             {/* 1. Header Area with Target ID for Flying Animation */}
-            <div>
+            <div className="flex flex-col min-h-0 flex-1">
                 <div className="flex justify-between items-center pb-3 border-b border-base-200 mb-3">
                     <h2 id="desktop-cart-icon" className="font-bold text-lg flex items-center gap-2">
                         🛒 {t('pos.cartTitle')}
@@ -65,7 +72,7 @@ export const CartList: React.FC<CartListProps> = ({ onOpenCheckout, onClose }) =
                     </div>
                 </div>
 
-                {/* 2. Cart Items List */}
+                {/* 2. Cart Items List — height adapts to item count, scrolls only past 80vh container cap */}
                 {cart.length === 0 ? (
                     <div className="text-center py-12 text-base-content/40">
                         <div className="text-5xl mb-3">🛒</div>
@@ -75,7 +82,7 @@ export const CartList: React.FC<CartListProps> = ({ onOpenCheckout, onClose }) =
                         </p>
                     </div>
                 ) : (
-                    <div className="space-y-3 max-h-[calc(100vh-320px)] lg:max-h-[calc(100vh-320px)] overflow-y-auto pr-1">
+                    <div className="space-y-3 flex-1 min-h-0 overflow-y-auto pr-1">
                         {cart.map((item) => {
                             const isMaxStock = item.quantity >= item.product.stock;
 
@@ -160,11 +167,23 @@ export const CartList: React.FC<CartListProps> = ({ onOpenCheckout, onClose }) =
 
             {/* 3. Footer / Checkout Area */}
             {cart.length > 0 && (
-                <div className="pt-4 border-t border-base-200 mt-4 space-y-3">
-                    <div className="flex justify-between items-center text-base">
-                        <span className="font-semibold text-base-content/60">စုစုပေါင်း ကျသင့်ငွေ</span>
+                <div className="pt-4 border-t border-base-200 mt-4 space-y-2">
+                    <div className="flex justify-between items-center text-sm">
+                        <span className="font-medium text-base-content/60">ကျသင့်ငွေ (Subtotal)</span>
+                        <span className="font-semibold text-base-content/80">
+                            {totalPrice.toLocaleString()} {t('common.kyat')}
+                        </span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                        <span className="font-medium text-base-content/60">အခွန် ({taxRate}%)</span>
+                        <span className="font-semibold text-base-content/80">
+                            {taxAmount.toLocaleString()} {t('common.kyat')}
+                        </span>
+                    </div>
+                    <div className="flex justify-between items-center text-base pt-1 border-t border-dashed border-base-200">
+                        <span className="font-bold text-base-content">စုစုပေါင်း (Grand Total)</span>
                         <span className="font-extrabold text-xl text-success">
-                            {totalPrice.toLocaleString()} ကျပ်
+                            {grandTotal.toLocaleString()} {t('common.kyat')}
                         </span>
                     </div>
 

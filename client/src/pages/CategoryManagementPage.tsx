@@ -125,7 +125,8 @@ export const CategoryManagementPage: React.FC = () => {
                     />
                 </div>
 
-                <div className="overflow-x-auto">
+                {/* Desktop: table view (md and up) */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="table table-zebra w-full text-sm">
                         <thead>
                             <tr className="bg-base-200/50 text-base-content/70">
@@ -191,6 +192,59 @@ export const CategoryManagementPage: React.FC = () => {
                             )}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Mobile: card view — status badge and action buttons get
+                    their own rows so they no longer overlap on narrow screens */}
+                <div className="md:hidden">
+                    {isLoading ? (
+                        <div className="text-center py-8 text-base-content/60">
+                            <span className="loading loading-spinner loading-md text-success"></span>
+                            <p className="mt-2 text-xs">အချက်အလက်များ ရယူနေပါသည်...</p>
+                        </div>
+                    ) : filteredCategories.length === 0 ? (
+                        <div className="text-center py-8 text-base-content/50">
+                            အမျိုးအစားများ မရှိသေးပါ သို့မဟုတ် ရှာဖွေမှု မတွေ့ရှိပါ။
+                        </div>
+                    ) : (
+                        <div className="divide-y divide-base-200">
+                            {filteredCategories.map((cat, idx) => (
+                                <div key={cat.id} className="p-4 space-y-3">
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="min-w-0">
+                                            <p className="font-mono text-[10px] text-base-content/40">#{idx + 1}</p>
+                                            <p className="font-bold text-base-content truncate">{cat.name}</p>
+                                            <p className="text-xs text-base-content/60 line-clamp-2 mt-0.5">
+                                                {cat.description || '-'}
+                                            </p>
+                                        </div>
+                                        <span className="badge badge-success badge-sm text-white font-medium flex-shrink-0">
+                                            အသုံးပြုနိုင်သည်
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => openEditModal(cat)}
+                                            className="btn btn-outline btn-xs text-info border-info/40 hover:bg-info/10 hover:border-info flex-1"
+                                            title="ပြင်ဆင်မည်"
+                                        >
+                                            ✏️ ပြင်မည်
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setDeletingId(cat.id);
+                                                setDeleteError(null);
+                                            }}
+                                            className="btn btn-outline btn-xs text-error border-error/40 hover:bg-error/10 hover:border-error flex-1"
+                                            title="ဖျက်မည်"
+                                        >
+                                            🗑️ ဖျက်မည်
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 

@@ -71,6 +71,8 @@ export const SalesRecordsPage: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [editOrder, setEditOrder] = useState<Order | null>(null);
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'PAID' | 'UNPAID'>('ALL');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [markingPaidId, setMarkingPaidId] = useState<string | null>(null);
   const [markingDoneId, setMarkingDoneId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -78,9 +80,14 @@ export const SalesRecordsPage: React.FC = () => {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
+      // Server-side date range filter (YYYY-MM-DD, inclusive)
+      const params: Record<string, string> = {};
+      if (dateFrom) params.startDate = dateFrom;
+      if (dateTo) params.endDate = dateTo;
+
       const [ordersRes, analyticsRes] = await Promise.all([
-        api.get('/orders'),
-        api.get('/orders/analytics'),
+        api.get('/orders', { params }),
+        api.get('/orders/analytics', { params }),
       ]);
 
       if (ordersRes.data?.success) {
@@ -94,16 +101,25 @@ export const SalesRecordsPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [dateFrom, dateTo]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  // Filtered orders
-  const filteredOrders = filterStatus === 'ALL'
-    ? orders
-    : orders.filter((o) => o.paymentStatus === filterStatus);
+  // Filtered orders — payment status + client-side date range guard
+  // (local calendar-day comparison so timezone shifts can't leak rows)
+  const isInDateRange = (o: Order): boolean => {
+    if (!dateFrom && !dateTo) return true;
+    const day = new Date(o.createdAt).toLocaleDateString('en-CA'); // YYYY-MM-DD
+    if (dateFrom && day < dateFrom) return false;
+    if (dateTo && day > dateTo) return false;
+    return true;
+  };
+
+  const filteredOrders = orders.filter(
+    (o) => (filterStatus === 'ALL' || o.paymentStatus === filterStatus) && isInDateRange(o)
+  );
 
   // Selection handlers
   const toggleSelectAll = () => {
@@ -276,6 +292,37 @@ export const SalesRecordsPage: React.FC = () => {
           <span className="text-xs text-base-content/50">
             {t('sales.ordersCount', { count: filteredOrders.length })}
           </span>
+        </div>
+
+        {/* Date Range Filter */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold text-base-content/60">📅 {t('sales.dateRange')}:</span>
+          <input
+            type="date"
+            aria-label={t('sales.fromDate')}
+            className="input input-bordered input-sm"
+            value={dateFrom}
+            max={dateTo || undefined}
+            onChange={(e) => { setDateFrom(e.target.value); setSelectedIds(new Set()); }}
+          />
+          <span className="text-xs text-base-content/40">→</span>
+          <input
+            type="date"
+            aria-label={t('sales.toDate')}
+            className="input input-bordered input-sm"
+            value={dateTo}
+            min={dateFrom || undefined}
+            onChange={(e) => { setDateTo(e.target.value); setSelectedIds(new Set()); }}
+          />
+          {(dateFrom || dateTo) && (
+            <button
+              onClick={() => { setDateFrom(''); setDateTo(''); setSelectedIds(new Set()); }}
+              className="btn btn-ghost btn-xs text-error hover:bg-error/10 font-bold"
+              title={t('sales.clearDates')}
+            >
+              ✖ {t('sales.clearDates')}
+            </button>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-3">

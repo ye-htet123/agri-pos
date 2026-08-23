@@ -1,24 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar } from './components/layout/Sidebar';
 import { LoginPage } from './pages/LoginPage';
 import { PosPage } from './pages/PosPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { AnalyticsPage } from './pages/AnalyticsPage';
 import { StaffPage } from './pages/StaffPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { CategoryManagementPage } from './pages/CategoryManagementPage';
 import { SalesRecordsPage } from './pages/SalesRecordsPage';
+import { CustomersPage } from './pages/CustomersPage';
 import { useAuth } from './context/AuthContext';
 import { useLanguage } from './context/LanguageContext';
 import { ProductProvider } from './context/ProductContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { CategoryProvider } from './context/CategoryContext';
+import api from './services/api';
 
 export default function App() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const { t } = useLanguage();
   const [currentPath, setCurrentPath] = useState('pos');
+
+  useEffect(() => {
+    // Silent keep-alive ping — wakes a sleeping Render free-tier dyno
+    // before the user submits the login form. Fire-and-forget.
+    api.get('/ping', { timeout: 10000 }).catch(() => {});
+  }, []);
 
   if (isLoading) {
     return (
@@ -33,7 +42,7 @@ export default function App() {
     return <LoginPage />;
   }
 
-  const VALID_PATHS = ['pos', 'sales-records', 'inventory', 'categories', 'dashboard', 'staff', 'settings'];
+  const VALID_PATHS = ['pos', 'sales-records', 'customers', 'inventory', 'categories', 'dashboard', 'analytics', 'staff', 'settings'];
 
   return (
     <SettingsProvider>
@@ -49,9 +58,11 @@ export default function App() {
                 {/* Dynamic Page Rendering */}
                 {currentPath === 'pos' && <PosPage />}
                 {currentPath === 'sales-records' && <SalesRecordsPage />}
+                {currentPath === 'customers' && <CustomersPage />}
                 {currentPath === 'inventory' && <InventoryPage />}
                 {currentPath === 'categories' && <CategoryManagementPage />}
                 {currentPath === 'dashboard' && <DashboardPage />}
+                {currentPath === 'analytics' && <AnalyticsPage />}
                 {currentPath === 'staff' && <StaffPage />}
                 {currentPath === 'settings' && <SettingsPage />}
 
