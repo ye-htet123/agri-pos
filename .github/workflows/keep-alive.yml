@@ -1,0 +1,31 @@
+name: Keep Render Awake
+
+# Pings the Render health endpoint every 5 minutes so the free-tier dyno
+# never sleeps (Render idles a service after ~15 min without traffic).
+#
+# Setup (one time):
+#   Repo → Settings → Secrets and variables → Actions → Variables tab
+#   → New repository variable:
+#        Name:  RENDER_HEALTH_URL
+#        Value: https://<your-app>.onrender.com/api/v1/health
+
+on:
+  schedule:
+    - cron: '*/5 * * * *' # every 5 minutes
+  workflow_dispatch: {} # allows manual runs from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health endpoint
+        env:
+          HEALTH_URL: ${{ vars.RENDER_HEALTH_URL }}
+        run: |
+          if [ -z "$HEALTH_URL" ]; then
+            echo "RENDER_HEALTH_URL variable not set — skipping ping."
+            echo "Add it under Settings → Secrets and variables → Actions → Variables."
+            exit 0
+          fi
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 120 "$HEALTH_URL")
+          echo "$(date -u +%FT%TZ) $HEALTH_URL -> HTTP $STATUS"
