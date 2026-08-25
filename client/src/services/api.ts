@@ -22,11 +22,38 @@ const API_BASE_URL = getDynamicApiBaseUrl();
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true, // ⚠️ Required for sending cross-site cookies
+  withCredentials: true, // Required for sending cross-site cookies
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 60000, // generous enough to survive a Render free-tier cold start
 });
+
+// ── Keep-alive / cold-start pre-warm ──────────────────────────────────
+// Render free tier sleeps after ~15 min idle and needs ~30-60s to wake.
+// Pinging at MODULE LOAD (before React even renders) shaves that wait off
+// every first visit. warmUpServer() can be re-invoked safely anywhere.
+let isWarmingUp = false;
+let isWarm = false;
+
+export const warmUpServer = (): void => {
+  if (isWarm || isWarmingUp) return;
+  isWarmingUp = true;
+  api
+    .get('/ping', { timeout: 90000 })
+    .then(() => {
+      isWarm = true;
+    })
+    .catch(() => {
+      // allow retry on the next call (e.g. login submit)
+    })
+    .finally(() => {
+      isWarmingUp = false;
+    });
+};
+
+// Wake the dyno as early as physically possible
+warmUpServer();
 
 // Response interceptor for auto token refresh
 api.interceptors.response.use(

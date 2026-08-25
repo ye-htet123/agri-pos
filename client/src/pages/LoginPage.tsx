@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { warmUpServer } from '../services/api';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -10,6 +11,14 @@ export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Keep pinging the sleeping Render dyno while the login screen is open —
+  // by the time credentials are typed, the server is usually awake.
+  useEffect(() => {
+    warmUpServer();
+    const interval = setInterval(warmUpServer, 25000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -2,6 +2,7 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import compression from 'compression';
 
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
@@ -14,6 +15,10 @@ import customerRoutes from './routes/customerRoutes';
 import { errorHandlerMiddleware } from './middlewares/errorHandlerMiddleware';
 
 const app: Application = express();
+
+// Gzip compression — order/customer JSON payloads shrink 70-90% over the wire,
+// which matters a lot on mobile networks hitting the Render-hosted API.
+app.use(compression());
 
 // Security Middlewares
 app.use(
