@@ -3,16 +3,17 @@ name: Keep Render Awake
 # Pings the Render health endpoint every 5 minutes so the free-tier dyno
 # never sleeps (Render idles a service after ~15 min without traffic).
 #
-# Setup (one time):
-#   Repo → Settings → Secrets and variables → Actions → Variables tab
-#   → New repository variable:
-#        Name:  RENDER_HEALTH_URL
-#        Value: https://<your-app>.onrender.com/api/v1/health
+# The production URL is baked in below. To override it without editing this
+# file, set a repository variable RENDER_HEALTH_URL under
+# Settings → Secrets and variables → Actions → Variables.
 
 on:
   schedule:
     - cron: '*/5 * * * *' # every 5 minutes
   workflow_dispatch: {} # allows manual runs from the Actions tab
+
+env:
+  DEFAULT_HEALTH_URL: https://agri-pos-api.onrender.com/api/v1/health
 
 jobs:
   ping:
@@ -22,10 +23,10 @@ jobs:
         env:
           HEALTH_URL: ${{ vars.RENDER_HEALTH_URL }}
         run: |
-          if [ -z "$HEALTH_URL" ]; then
-            echo "RENDER_HEALTH_URL variable not set — skipping ping."
-            echo "Add it under Settings → Secrets and variables → Actions → Variables."
-            exit 0
+          TARGET="${HEALTH_URL:-$DEFAULT_HEALTH_URL}"
+          echo "Pinging $TARGET"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 120 "$TARGET")
+          echo "$(date -u +%FT%TZ) $TARGET -> HTTP $STATUS"
+          if [ "$STATUS" = "000" ]; then
+            echo "::warning::Health endpoint unreachable"
           fi
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 120 "$HEALTH_URL")
-          echo "$(date -u +%FT%TZ) $HEALTH_URL -> HTTP $STATUS"
