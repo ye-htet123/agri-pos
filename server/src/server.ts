@@ -5,6 +5,7 @@ import os from 'os';
 import app from './app';
 import { connectDB } from './config/db';
 import { connectRedis } from './config/redis';
+import { startKeepAlive } from './config/keepAlive';
 import { User } from './models/User';
 import { Product } from './models/Product';
 import { StoreSetting } from './models/StoreSetting';
@@ -126,10 +127,13 @@ const startServer = async () => {
   app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`=================================`);
     console.log(`🚀 Agri-POS Backend API running on port ${PORT}`);
-    console.log(`👉 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`👉 Local:   http://localhost:${PORT}`);
-    console.log(`👉 Network: http://${localIp}:${PORT}`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🏠 Local:   http://localhost:${PORT}`);
+    console.log(`📡 Network: http://${localIp}:${PORT}`);
     console.log(`=================================`);
+
+    // Prevent the Render free-tier dyno from sleeping (SELF_PING_URL env)
+    startKeepAlive();
   });
 };
 
